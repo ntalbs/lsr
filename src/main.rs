@@ -21,12 +21,12 @@ pub struct Args {
 }
 
 fn file_type(path: &Path) -> String {
-    if path.is_dir() {
+    if path.is_symlink() {
+        "l".to_string()
+    } else if path.is_dir() {
         "d".to_string()
     } else if path.is_file() {
         "-".to_string()
-    } else if path.is_symlink() {
-        "l".to_string()
     } else {
         "?".to_string()
     }
