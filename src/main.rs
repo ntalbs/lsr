@@ -10,7 +10,7 @@ use tabular::{Row, Table};
 use users::{get_group_by_gid, get_user_by_uid};
 
 #[derive(Debug, Default, Parser)]
-#[clap(version, about = "A Very simple ls clone")]
+#[clap(version, about = "A very basic ls clone")]
 pub struct Args {
     #[clap(default_value = ".")]
     paths: Vec<String>,
