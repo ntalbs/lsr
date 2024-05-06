@@ -154,7 +154,7 @@ fn main() -> io::Result<()> {
                 print!("{}", format_output(&paths)?);
             } else {
                 for path in paths {
-                    println!("{}", path.file_name().unwrap().to_string_lossy());
+                    println!("{}", file_name(&path));
                 }
             }
         } else {
