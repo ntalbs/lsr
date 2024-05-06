@@ -157,7 +157,7 @@ fn main() -> io::Result<()> {
 
     // print files first
     if args.long {
-        println!("{}", format_output_long(&fs)?);
+        print!("{}", format_output_long(&fs)?);
     } else {
         println!("{}", format_output_short(&fs)?);
     }
