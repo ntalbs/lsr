@@ -67,12 +67,12 @@ fn modified_date(md: &Metadata) -> String {
     modified.format("%Y-%m-%d %H:%M").to_string()
 }
 
-fn file_name(path: &Path) -> String {
+fn file_name(path: &Path, long: bool) -> String {
     let mut name = path
         .file_name()
         .map(|f| f.to_string_lossy().into_owned())
         .unwrap_or_default();
-    if path.is_symlink() {
+    if long && path.is_symlink() {
         if let Ok(target) = fs::read_link(path) {
             name.push_str(" -> ");
             name.push_str(&target.to_string_lossy());
@@ -86,7 +86,7 @@ fn file_name(path: &Path) -> String {
 fn format_output_short(paths: &[PathBuf]) -> io::Result<String> {
     Ok(paths
         .iter()
-        .map(|p| file_name(p))
+        .map(|p| file_name(p, false))
         .collect::<Vec<String>>()
         .join("\n"))
 }
@@ -106,7 +106,7 @@ fn format_output_long(paths: &[PathBuf]) -> io::Result<String> {
                 .with_cell(group_name(&md))
                 .with_cell(md.len())
                 .with_cell(modified_date(&md))
-                .with_cell(file_name(path)),
+                .with_cell(file_name(path, true)),
         );
     }
     Ok(format!("{table}"))
@@ -166,7 +166,7 @@ fn main() -> io::Result<()> {
     for path in &directories {
         let paths = files_in(path, args.show_all)?;
         if directories.len() > 1 {
-            println!("\n{}:", file_name(path));
+            println!("\n{}:", file_name(path, false));
         }
         if args.long {
             print!("{}", format_output_long(&paths)?);
