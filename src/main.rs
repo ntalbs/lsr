@@ -83,7 +83,7 @@ fn file_name(path: &Path) -> String {
     name
 }
 
-fn format_output(paths: &[PathBuf]) -> io::Result<String> {
+fn format_output_long(paths: &[PathBuf]) -> io::Result<String> {
     let fmt = "{:<}{:<}  {:>}  {:<}  {:<}  {:>}  {:<}  {:<}";
     let mut table = Table::new(fmt);
 
@@ -148,7 +148,7 @@ fn main() -> io::Result<()> {
 
     // print files first
     if args.long {
-        println!("{}", format_output(&fs)?);
+        println!("{}", format_output_long(&fs)?);
     } else {
         for path in fs {
             println!("{}", file_name(&path));
@@ -164,7 +164,7 @@ fn main() -> io::Result<()> {
                 println!("\n{}:", file_name(&path));
             }
             if args.long {
-                print!("{}", format_output(&paths)?);
+                print!("{}", format_output_long(&paths)?);
             } else {
                 for path in paths {
                     println!("{}", file_name(&path));
