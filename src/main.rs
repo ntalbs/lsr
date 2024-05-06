@@ -84,12 +84,11 @@ fn file_name(path: &Path) -> String {
 }
 
 fn format_output_short(paths: &[PathBuf]) -> io::Result<String> {
-    Ok(
-        paths.iter()
-            .map(|p| file_name(p))
-            .collect::<Vec<String>>()
-            .join("\n")
-    )
+    Ok(paths
+        .iter()
+        .map(|p| file_name(p))
+        .collect::<Vec<String>>()
+        .join("\n"))
 }
 
 fn format_output_long(paths: &[PathBuf]) -> io::Result<String> {
@@ -138,11 +137,13 @@ fn files(path: &Path, show_all: bool) -> io::Result<Vec<PathBuf>> {
 fn main() -> io::Result<()> {
     let args = Args::parse();
 
-    let mut paths = args.paths.iter()
+    let mut paths = args
+        .paths
+        .iter()
         .map(PathBuf::from)
         .collect::<Vec<PathBuf>>();
 
-    paths.sort_by(|a, b|
+    paths.sort_by(|a, b| {
         if a.is_dir() && !b.is_dir() {
             std::cmp::Ordering::Greater
         } else if !a.is_dir() && b.is_dir() {
@@ -150,10 +151,9 @@ fn main() -> io::Result<()> {
         } else {
             a.cmp(b)
         }
-    );
+    });
 
-    let (fs, dirs): (Vec<_>, Vec<_>)
-        = paths.iter().cloned().partition(|f| !f.is_dir());
+    let (fs, dirs): (Vec<_>, Vec<_>) = paths.iter().cloned().partition(|f| !f.is_dir());
 
     // print files first
     if args.long {
