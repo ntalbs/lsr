@@ -83,6 +83,15 @@ fn file_name(path: &Path) -> String {
     name
 }
 
+fn format_output_short(paths: &[PathBuf]) -> io::Result<String> {
+    Ok(
+        paths.iter()
+            .map(|p| file_name(p))
+            .collect::<Vec<String>>()
+            .join("\n")
+    )
+}
+
 fn format_output_long(paths: &[PathBuf]) -> io::Result<String> {
     let fmt = "{:<}{:<}  {:>}  {:<}  {:<}  {:>}  {:<}  {:<}";
     let mut table = Table::new(fmt);
@@ -150,28 +159,19 @@ fn main() -> io::Result<()> {
     if args.long {
         println!("{}", format_output_long(&fs)?);
     } else {
-        for path in fs {
-            println!("{}", file_name(&path));
-        }
+        println!("{}", format_output_short(&fs)?);
     }
 
     // print directories
-    for path in dirs {
-        let md = fs::metadata(&path)?;
-        if md.is_dir() {
-            let paths = files(&path, args.show_all)?;
-            if args.paths.len() > 1 {
-                println!("\n{}:", file_name(&path));
-            }
-            if args.long {
-                print!("{}", format_output_long(&paths)?);
-            } else {
-                for path in paths {
-                    println!("{}", file_name(&path));
-                }
-            }
+    for path in &dirs {
+        let paths = files(path, args.show_all)?;
+        if dirs.len() > 1 {
+            println!("\n{}:", file_name(path));
+        }
+        if args.long {
+            print!("{}", format_output_long(&paths)?);
         } else {
-            println!("{}", file_name(&path));
+            println!("{}", format_output_short(&paths)?);
         }
     }
 
