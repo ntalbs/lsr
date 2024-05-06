@@ -71,7 +71,7 @@ fn file_name(path: &Path) -> String {
     let mut name = path
         .file_name()
         .map(|f| f.to_string_lossy().into_owned())
-        .unwrap_or_else(|| "".to_string());
+        .unwrap_or_default();
     if path.is_symlink() {
         if let Ok(target) = fs::read_link(path) {
             name.push_str(" -> ");
@@ -130,7 +130,7 @@ fn main() -> io::Result<()> {
     let args = Args::parse();
 
     let mut paths = args.paths.iter()
-        .map(|p| PathBuf::from(p))
+        .map(PathBuf::from)
         .collect::<Vec<PathBuf>>();
 
     paths.sort_by(|a, b|
