@@ -143,7 +143,20 @@ fn main() -> io::Result<()> {
         }
     );
 
-    for path in paths {
+    let (fs, dirs): (Vec<_>, Vec<_>)
+        = paths.iter().cloned().partition(|f| !f.is_dir());
+
+    // print files first
+    if args.long {
+        println!("{}", format_output(&fs)?);
+    } else {
+        for path in fs {
+            println!("{}", file_name(&path));
+        }
+    }
+
+    // print directories
+    for path in dirs {
         let md = fs::metadata(&path)?;
         if md.is_dir() {
             let paths = files(&path, args.show_all)?;
