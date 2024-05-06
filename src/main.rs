@@ -104,7 +104,7 @@ fn format_output(paths: &[PathBuf]) -> io::Result<String> {
     Ok(format!("{table}"))
 }
 
-fn files(path: &String, show_all: bool) -> io::Result<Vec<PathBuf>> {
+fn files(path: &Path, show_all: bool) -> io::Result<Vec<PathBuf>> {
     let mut results = vec![];
     let md = fs::metadata(path)?;
     if md.is_dir() {
@@ -129,12 +129,26 @@ fn files(path: &String, show_all: bool) -> io::Result<Vec<PathBuf>> {
 fn main() -> io::Result<()> {
     let args = Args::parse();
 
-    for path in &args.paths {
-        let md = fs::metadata(path)?;
+    let mut paths = args.paths.iter()
+        .map(|p| PathBuf::from(p))
+        .collect::<Vec<PathBuf>>();
+
+    paths.sort_by(|a, b|
+        if a.is_dir() && !b.is_dir() {
+            std::cmp::Ordering::Greater
+        } else if !a.is_dir() && b.is_dir() {
+            std::cmp::Ordering::Less
+        } else {
+            a.cmp(b)
+        }
+    );
+
+    for path in paths {
+        let md = fs::metadata(&path)?;
         if md.is_dir() {
-            let paths = files(path, args.show_all)?;
-            if &args.paths.len() > &1 {
-                println!("\n{path}:");
+            let paths = files(&path, args.show_all)?;
+            if args.paths.len() > 1 {
+                println!("\n{}:", file_name(&path));
             }
             if args.long {
                 print!("{}", format_output(&paths)?);
@@ -144,7 +158,7 @@ fn main() -> io::Result<()> {
                 }
             }
         } else {
-            println!("{}", path);
+            println!("{}", file_name(&path));
         }
     }
 
