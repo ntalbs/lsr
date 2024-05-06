@@ -153,19 +153,19 @@ fn main() -> io::Result<()> {
         }
     });
 
-    let (fs, dirs): (Vec<_>, Vec<_>) = paths.iter().cloned().partition(|f| !f.is_dir());
+    let (files, directories): (Vec<_>, Vec<_>) = paths.iter().cloned().partition(|f| !f.is_dir());
 
     // print files first
     if args.long {
-        print!("{}", format_output_long(&fs)?);
+        print!("{}", format_output_long(&files)?);
     } else {
-        println!("{}", format_output_short(&fs)?);
+        println!("{}", format_output_short(&files)?);
     }
 
     // print directories
-    for path in &dirs {
+    for path in &directories {
         let paths = files_in(path, args.show_all)?;
-        if dirs.len() > 1 {
+        if directories.len() > 1 {
             println!("\n{}:", file_name(path));
         }
         if args.long {
