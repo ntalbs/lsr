@@ -112,7 +112,7 @@ fn format_output_long(paths: &[PathBuf]) -> io::Result<String> {
     Ok(format!("{table}"))
 }
 
-fn files(path: &Path, show_all: bool) -> io::Result<Vec<PathBuf>> {
+fn files_in(path: &Path, show_all: bool) -> io::Result<Vec<PathBuf>> {
     let mut results = vec![];
     let md = fs::metadata(path)?;
     if md.is_dir() {
@@ -164,7 +164,7 @@ fn main() -> io::Result<()> {
 
     // print directories
     for path in &dirs {
-        let paths = files(path, args.show_all)?;
+        let paths = files_in(path, args.show_all)?;
         if dirs.len() > 1 {
             println!("\n{}:", file_name(path));
         }
