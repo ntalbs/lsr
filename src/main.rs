@@ -104,30 +104,22 @@ fn format_output(paths: &[PathBuf]) -> io::Result<String> {
     Ok(format!("{table}"))
 }
 
-fn find_files(paths: &[String], show_all: bool) -> io::Result<Vec<PathBuf>> {
+fn files(path: &String, show_all: bool) -> io::Result<Vec<PathBuf>> {
     let mut results = vec![];
-    for name in paths {
-        match fs::metadata(name) {
-            Ok(md) => {
-                if md.is_dir() {
-                    for entry in fs::read_dir(name)? {
-                        let entry = entry?;
-                        let path = entry.path();
-                        let is_hidden = path.file_name().map_or(false, |file_name| {
-                            file_name.to_string_lossy().starts_with('.')
-                        });
-                        if show_all || !is_hidden {
-                            results.push(path);
-                        }
-                    }
-                } else {
-                    results.push(PathBuf::from(name));
-                }
-            }
-            Err(e) => {
-                eprintln!("{name}: {e}");
+    let md = fs::metadata(path)?;
+    if md.is_dir() {
+        for entry in fs::read_dir(path)? {
+            let entry = entry?;
+            let path = entry.path();
+            let is_hidden = path.file_name().map_or(false, |file_name| {
+                file_name.to_string_lossy().starts_with('.')
+            });
+            if show_all || !is_hidden {
+                results.push(path);
             }
         }
+    } else {
+        results.push(PathBuf::from(path));
     }
     results.sort();
 
@@ -136,13 +128,23 @@ fn find_files(paths: &[String], show_all: bool) -> io::Result<Vec<PathBuf>> {
 
 fn main() -> io::Result<()> {
     let args = Args::parse();
-    let paths = find_files(&args.paths, args.show_all)?;
 
-    if args.long {
-        print!("{}", format_output(&paths)?);
-    } else {
-        for path in paths {
-            println!("{}", path.file_name().unwrap().to_string_lossy());
+    for path in &args.paths {
+        let md = fs::metadata(path)?;
+        if md.is_dir() {
+            let paths = files(path, args.show_all)?;
+            if &args.paths.len() > &1 {
+                println!("\n{path}:");
+            }
+            if args.long {
+                print!("{}", format_output(&paths)?);
+            } else {
+                for path in paths {
+                    println!("{}", path.file_name().unwrap().to_string_lossy());
+                }
+            }
+        } else {
+            println!("{}", path);
         }
     }
 
