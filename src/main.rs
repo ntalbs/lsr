@@ -1,8 +1,10 @@
 use chrono::{DateTime, Local};
 use clap::Parser;
+use term_grid::{Direction, Filling, Grid, GridOptions};
+use terminal_size::{terminal_size, Width};
 use std::{
     fs::{self, Metadata},
-    io,
+    io::{self, Error},
     os::unix::fs::MetadataExt,
     path::{Path, PathBuf},
 };
@@ -84,11 +86,24 @@ fn file_name(path: &Path, long: bool) -> String {
 }
 
 fn format_output_short(paths: &[PathBuf]) -> io::Result<String> {
-    Ok(paths
-        .iter()
-        .map(|p| file_name(p, false))
-        .collect::<Vec<String>>()
-        .join("\n"))
+    let term_size = terminal_size();
+    if let Some((Width(w), _)) = term_size {
+        let cells = paths
+            .iter()
+            .map(|p| file_name(p, false))
+            .collect();
+        let grid = Grid::new(
+            cells,
+            GridOptions {
+                filling: Filling::Spaces(2),
+                direction: Direction::LeftToRight,
+                width: w as usize,
+            }
+        );
+        Ok(format!("{grid}"))
+    } else {
+        Err(Error::new(io::ErrorKind::Other, "Failed to get terminal width."))
+    }
 }
 
 fn format_output_long(paths: &[PathBuf]) -> io::Result<String> {
@@ -159,7 +174,7 @@ fn main() -> io::Result<()> {
     if args.long {
         print!("{}", format_output_long(&files)?);
     } else {
-        println!("{}", format_output_short(&files)?);
+        print!("{}", format_output_short(&files)?);
     }
 
     // print directories
@@ -171,7 +186,7 @@ fn main() -> io::Result<()> {
         if args.long {
             print!("{}", format_output_long(&paths)?);
         } else {
-            println!("{}", format_output_short(&paths)?);
+            print!("{}", format_output_short(&paths)?);
         }
     }
 
