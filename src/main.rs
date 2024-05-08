@@ -85,6 +85,23 @@ fn file_name(path: &Path, long: bool) -> String {
     name
 }
 
+fn file_size(md: &Metadata) -> String {
+    if !md.is_file() {
+        return "-".into();
+    }
+
+    let len = md.len();
+    if len < 1024 {
+        format!("{len}")
+    } else if len < 1024 * 1024 {
+        format!("{:.1}k", len as f64 / 1024.0)
+    } else if len < 1024 * 1024 * 1024 {
+        format!("{:.1}M", len as f64 / 1024.0 / 1024.0)
+    } else {
+        format!("{:.1}G", len as f64 / 1024.0 / 1024.0 / 1024.0)
+    }
+}
+
 fn format_output_short(paths: &[PathBuf]) -> io::Result<String> {
     let term_size = terminal_size();
     if let Some((Width(w), _)) = term_size {
@@ -119,7 +136,7 @@ fn format_output_long(paths: &[PathBuf]) -> io::Result<String> {
                 .with_cell(md.nlink())
                 .with_cell(user_name(&md))
                 .with_cell(group_name(&md))
-                .with_cell(md.len())
+                .with_cell(file_size(&md))
                 .with_cell(modified_date(&md))
                 .with_cell(file_name(path, true)),
         );
