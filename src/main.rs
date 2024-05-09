@@ -70,6 +70,12 @@ fn modified_date(md: &Metadata) -> String {
 }
 
 fn file_name(path: &Path, long: bool) -> String {
+    if path == PathBuf::from(".") {
+        return ".".into();
+    } else if path == PathBuf::from("..") {
+        return "..".into();
+    }
+
     let mut name = path
         .file_name()
         .map(|f| f.to_string_lossy().into_owned())
@@ -162,6 +168,11 @@ fn files_in(path: &Path, show_all: bool) -> io::Result<Vec<PathBuf>> {
         results.push(PathBuf::from(path));
     }
     results.sort();
+
+    if show_all {
+        results.insert(0, PathBuf::from("."));
+        results.insert(1, PathBuf::from(".."));
+    }
 
     Ok(results)
 }
