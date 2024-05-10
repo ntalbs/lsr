@@ -14,11 +14,11 @@ use users::{get_group_by_gid, get_user_by_uid};
 #[derive(Debug, Default, Parser)]
 #[clap(version, about = "A very basic ls clone")]
 pub struct Args {
-    #[clap(default_value = ".")]
+    #[clap(default_value = ".", help = "List of files/directories")]
     paths: Vec<String>,
-    #[clap(short('l'), long, default_value_t = false, help = "Long listing")]
+    #[clap(short('l'), long("long"), default_value_t = false, help = "Show hidden and 'dot' files including '.' and '..' directories")]
     long: bool,
-    #[clap(short('a'), long, default_value_t = false, help = "Show all files")]
+    #[clap(short('a'), long("all"), default_value_t = false, help = "Display extended file metadata as a table")]
     show_all: bool,
 }
 
