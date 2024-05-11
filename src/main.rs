@@ -20,6 +20,8 @@ pub struct Args {
     long: bool,
     #[clap(short('a'), long("all"), default_value_t = false, help = "Display extended file metadata as a table")]
     show_all: bool,
+    #[clap(short('g'), long("group"), default_value_t = false, help = "List each file's group")]
+    group: bool,
 }
 
 fn file_type(path: &Path) -> String {
@@ -57,7 +59,11 @@ fn user_name(md: &Metadata) -> String {
         .unwrap_or_else(|| uid.to_string())
 }
 
-fn group_name(md: &Metadata) -> String {
+fn group_name(md: &Metadata, show_group: bool) -> String {
+    if !show_group {
+        return "".into();
+    }
+
     let gid = md.gid();
     get_group_by_gid(gid)
         .map(|g| g.name().to_string_lossy().into_owned())
@@ -129,7 +135,7 @@ fn format_output_short(paths: &[PathBuf]) -> io::Result<String> {
     }
 }
 
-fn format_output_long(paths: &[PathBuf]) -> io::Result<String> {
+fn format_output_long(paths: &[PathBuf], args: &Args) -> io::Result<String> {
     let fmt = "{:<}{:<}  {:>}  {:<}  {:<}  {:>}  {:<}  {:<}";
     let mut table = Table::new(fmt);
 
@@ -141,7 +147,7 @@ fn format_output_long(paths: &[PathBuf]) -> io::Result<String> {
                 .with_cell(format_mode(md.mode()))
                 .with_cell(md.nlink())
                 .with_cell(user_name(&md))
-                .with_cell(group_name(&md))
+                .with_cell(group_name(&md, args.group))
                 .with_cell(file_size(&md))
                 .with_cell(modified_date(&md))
                 .with_cell(file_name(path, true)),
@@ -200,7 +206,7 @@ fn main() -> io::Result<()> {
 
     // print files first
     if args.long {
-        print!("{}", format_output_long(&files)?);
+        print!("{}", format_output_long(&files, &args)?);
     } else {
         print!("{}", format_output_short(&files)?);
     }
@@ -212,7 +218,7 @@ fn main() -> io::Result<()> {
             println!("\n{}:", file_name(path, false));
         }
         if args.long {
-            print!("{}", format_output_long(&paths)?);
+            print!("{}", format_output_long(&paths, &args)?);
         } else {
             print!("{}", format_output_short(&paths)?);
         }
