@@ -20,6 +20,8 @@ pub struct Args {
     long: bool,
     #[clap(short('a'), long("all"), default_value_t = false, help = "Display extended file metadata as a table")]
     show_all: bool,
+    #[clap(short('B'), long("bytes"), default_value_t = false, help = "List file sizes in bytes, without any prefixes")]
+    bytes: bool,
     #[clap(short('g'), long("group"), default_value_t = false, help = "List each file's group")]
     group: bool,
 }
@@ -97,20 +99,24 @@ fn file_name(path: &Path, long: bool) -> String {
     name
 }
 
-fn file_size(md: &Metadata) -> String {
+fn file_size(md: &Metadata, bytes: bool) -> String {
     if !md.is_file() {
         return "-".into();
     }
 
     let len = md.len();
-    if len < 1024 {
-        format!("{len}")
-    } else if len < 1024 * 1024 {
-        format!("{:.1}k", len as f64 / 1024.0)
-    } else if len < 1024 * 1024 * 1024 {
-        format!("{:.1}M", len as f64 / 1024.0 / 1024.0)
+    if bytes {
+        len.to_string()
     } else {
-        format!("{:.1}G", len as f64 / 1024.0 / 1024.0 / 1024.0)
+        if len < 1024 {
+            format!("{len}")
+        } else if len < 1024 * 1024 {
+            format!("{:.1}k", len as f64 / 1024.0)
+        } else if len < 1024 * 1024 * 1024 {
+            format!("{:.1}M", len as f64 / 1024.0 / 1024.0)
+        } else {
+            format!("{:.1}G", len as f64 / 1024.0 / 1024.0 / 1024.0)
+        }
     }
 }
 
@@ -148,7 +154,7 @@ fn format_output_long(paths: &[PathBuf], args: &Args) -> io::Result<String> {
                 .with_cell(md.nlink())
                 .with_cell(user_name(&md))
                 .with_cell(group_name(&md, args.group))
-                .with_cell(file_size(&md))
+                .with_cell(file_size(&md, args.bytes))
                 .with_cell(modified_date(&md))
                 .with_cell(file_name(path, true)),
         );
