@@ -1,7 +1,5 @@
 use chrono::{DateTime, Local};
 use clap::Parser;
-use term_grid::{Direction, Filling, Grid, GridOptions};
-use terminal_size::{terminal_size, Width};
 use std::{
     fs::{self, Metadata},
     io::{self, Error},
@@ -9,6 +7,8 @@ use std::{
     path::{Path, PathBuf},
 };
 use tabular::{Row, Table};
+use term_grid::{Direction, Filling, Grid, GridOptions};
+use terminal_size::{terminal_size, Width};
 use users::{get_group_by_gid, get_user_by_uid};
 
 #[derive(Debug, Default, Parser)]
@@ -16,13 +16,33 @@ use users::{get_group_by_gid, get_user_by_uid};
 pub struct Args {
     #[clap(default_value = ".", help = "List of files/directories")]
     paths: Vec<String>,
-    #[clap(short('l'), long("long"), default_value_t = false, help = "Show hidden and 'dot' files including '.' and '..' directories")]
+    #[clap(
+        short('l'),
+        long("long"),
+        default_value_t = false,
+        help = "Show hidden and 'dot' files including '.' and '..' directories"
+    )]
     long: bool,
-    #[clap(short('a'), long("all"), default_value_t = false, help = "Display extended file metadata as a table")]
+    #[clap(
+        short('a'),
+        long("all"),
+        default_value_t = false,
+        help = "Display extended file metadata as a table"
+    )]
     all: bool,
-    #[clap(short('B'), long("bytes"), default_value_t = false, help = "List file sizes in bytes, without any prefixes")]
+    #[clap(
+        short('B'),
+        long("bytes"),
+        default_value_t = false,
+        help = "List file sizes in bytes, without any prefixes"
+    )]
     bytes: bool,
-    #[clap(short('g'), long("group"), default_value_t = false, help = "List each file's group")]
+    #[clap(
+        short('g'),
+        long("group"),
+        default_value_t = false,
+        help = "List each file's group"
+    )]
     group: bool,
 }
 
@@ -123,21 +143,21 @@ fn file_size(md: &Metadata, bytes: bool) -> String {
 fn format_output_short(paths: &[PathBuf]) -> io::Result<String> {
     let term_size = terminal_size();
     if let Some((Width(w), _)) = term_size {
-        let cells = paths
-            .iter()
-            .map(|p| file_name(p, false))
-            .collect();
+        let cells = paths.iter().map(|p| file_name(p, false)).collect();
         let grid = Grid::new(
             cells,
             GridOptions {
                 filling: Filling::Spaces(2),
                 direction: Direction::LeftToRight,
                 width: w as usize,
-            }
+            },
         );
         Ok(format!("{grid}"))
     } else {
-        Err(Error::new(io::ErrorKind::Other, "Failed to get terminal width."))
+        Err(Error::new(
+            io::ErrorKind::Other,
+            "Failed to get terminal width.",
+        ))
     }
 }
 
