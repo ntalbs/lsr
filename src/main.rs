@@ -164,21 +164,17 @@ fn format_output_long(paths: &[PathBuf], args: &Args) -> io::Result<String> {
 
 fn files_in(path: &Path, all: bool) -> io::Result<Vec<PathBuf>> {
     let mut results = vec![];
-    let md = fs::metadata(path)?;
-    if md.is_dir() {
-        for entry in fs::read_dir(path)? {
-            let entry = entry?;
-            let path = entry.path();
-            let is_hidden = path.file_name().map_or(false, |file_name| {
-                file_name.to_string_lossy().starts_with('.')
-            });
-            if all || !is_hidden {
-                results.push(path);
-            }
+    for entry in fs::read_dir(path)? {
+        let entry = entry?;
+        let path = entry.path();
+        let is_hidden = path.file_name().map_or(false, |file_name| {
+            file_name.to_string_lossy().starts_with('.')
+        });
+        if all || !is_hidden {
+            results.push(path);
         }
-    } else {
-        results.push(PathBuf::from(path));
     }
+
     results.sort();
 
     if all {
