@@ -19,7 +19,7 @@ pub struct Args {
     #[clap(short('l'), long("long"), default_value_t = false, help = "Show hidden and 'dot' files including '.' and '..' directories")]
     long: bool,
     #[clap(short('a'), long("all"), default_value_t = false, help = "Display extended file metadata as a table")]
-    show_all: bool,
+    all: bool,
     #[clap(short('B'), long("bytes"), default_value_t = false, help = "List file sizes in bytes, without any prefixes")]
     bytes: bool,
     #[clap(short('g'), long("group"), default_value_t = false, help = "List each file's group")]
@@ -162,7 +162,7 @@ fn format_output_long(paths: &[PathBuf], args: &Args) -> io::Result<String> {
     Ok(format!("{table}"))
 }
 
-fn files_in(path: &Path, show_all: bool) -> io::Result<Vec<PathBuf>> {
+fn files_in(path: &Path, all: bool) -> io::Result<Vec<PathBuf>> {
     let mut results = vec![];
     let md = fs::metadata(path)?;
     if md.is_dir() {
@@ -172,7 +172,7 @@ fn files_in(path: &Path, show_all: bool) -> io::Result<Vec<PathBuf>> {
             let is_hidden = path.file_name().map_or(false, |file_name| {
                 file_name.to_string_lossy().starts_with('.')
             });
-            if show_all || !is_hidden {
+            if all || !is_hidden {
                 results.push(path);
             }
         }
@@ -181,7 +181,7 @@ fn files_in(path: &Path, show_all: bool) -> io::Result<Vec<PathBuf>> {
     }
     results.sort();
 
-    if show_all {
+    if all {
         results.insert(0, PathBuf::from("."));
         results.insert(1, PathBuf::from(".."));
     }
@@ -219,7 +219,7 @@ fn main() -> io::Result<()> {
 
     // print directories
     for path in &directories {
-        let paths = files_in(path, args.show_all)?;
+        let paths = files_in(path, args.all)?;
         if directories.len() > 1 {
             println!("\n{}:", file_name(path, false));
         }
