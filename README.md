@@ -7,11 +7,13 @@ A very basic ls clone
 Usage: lsr [OPTIONS] [PATHS]...
 
 Arguments:
-  [PATHS]...  [default: .]
+  [PATHS]...  List of files/directories [default: .]
 
 Options:
-  -l, --long      Long listing
-  -a, --show-all  Show all files
-  -h, --help      Print help
-  -V, --version   Print version
+  -l, --long     Show hidden and 'dot' files including '.' and '..' directories
+  -a, --all      Display extended file metadata as a table
+  -B, --bytes    List file sizes in bytes, without any prefixes
+  -g, --group    List each file's group
+  -h, --help     Print help
+  -V, --version  Print version
 ```
