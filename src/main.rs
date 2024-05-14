@@ -212,6 +212,14 @@ fn main() -> io::Result<()> {
         .paths
         .iter()
         .map(PathBuf::from)
+        .filter(|p| {
+            if p.exists() {
+                true
+            } else {
+                eprintln!("{}: No such file or directory.", file_name(p, false));
+                false
+            }
+        })
         .collect::<Vec<PathBuf>>();
 
     paths.sort_by(|a, b| {
