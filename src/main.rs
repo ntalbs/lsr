@@ -182,7 +182,7 @@ fn format_output_long(paths: &[PathBuf], args: &Args) -> io::Result<String> {
     Ok(format!("{table}"))
 }
 
-fn files_in(path: &Path, all: bool) -> io::Result<Vec<PathBuf>> {
+fn files_in(path: &Path, args: &Args) -> io::Result<Vec<PathBuf>> {
     let mut results = vec![];
     for entry in fs::read_dir(path)? {
         let entry = entry?;
@@ -190,14 +190,14 @@ fn files_in(path: &Path, all: bool) -> io::Result<Vec<PathBuf>> {
         let is_hidden = path.file_name().map_or(false, |file_name| {
             file_name.to_string_lossy().starts_with('.')
         });
-        if all || !is_hidden {
+        if args.all || !is_hidden {
             results.push(path);
         }
     }
 
     results.sort();
 
-    if all {
+    if args.all {
         results.insert(0, PathBuf::from("."));
         results.insert(1, PathBuf::from(".."));
     }
@@ -243,7 +243,7 @@ fn main() -> io::Result<()> {
 
     // print directories
     for path in &directories {
-        let paths = files_in(path, args.all)?;
+        let paths = files_in(path, &args)?;
         if directories.len() > 1 {
             println!("\n{}:", file_name(path, false));
         }
