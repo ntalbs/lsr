@@ -38,6 +38,20 @@ pub struct Args {
     )]
     bytes: bool,
     #[clap(
+        short('D'),
+        long("only-dirs"),
+        default_value_t = false,
+        help = "List only directories"
+    )]
+    only_dirs: bool,
+    #[clap(
+        short('f'),
+        long("only-files"),
+        default_value_t = false,
+        help = "List only files"
+    )]
+    only_files: bool,
+    #[clap(
         short('g'),
         long("group"),
         default_value_t = false,
@@ -190,6 +204,14 @@ fn files_in(path: &Path, args: &Args) -> io::Result<Vec<PathBuf>> {
         let is_hidden = path.file_name().map_or(false, |file_name| {
             file_name.to_string_lossy().starts_with('.')
         });
+        if args.only_dirs ^ args.only_files {
+            if args.only_dirs && path.is_file() {
+                continue;
+            }
+            if args.only_files && path.is_dir() {
+                continue;
+            }
+        }
         if args.all || !is_hidden {
             results.push(path);
         }
