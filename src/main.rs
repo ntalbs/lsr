@@ -141,16 +141,14 @@ fn file_size(md: &Metadata, bytes: bool) -> String {
     let len = md.len();
     if bytes {
         len.to_string()
+    } else if len < 1024 {
+        format!("{len}")
+    } else if len < 1024 * 1024 {
+        format!("{:.1}k", len as f64 / 1024.0)
+    } else if len < 1024 * 1024 * 1024 {
+        format!("{:.1}M", len as f64 / 1024.0 / 1024.0)
     } else {
-        if len < 1024 {
-            format!("{len}")
-        } else if len < 1024 * 1024 {
-            format!("{:.1}k", len as f64 / 1024.0)
-        } else if len < 1024 * 1024 * 1024 {
-            format!("{:.1}M", len as f64 / 1024.0 / 1024.0)
-        } else {
-            format!("{:.1}G", len as f64 / 1024.0 / 1024.0 / 1024.0)
-        }
+        format!("{:.1}G", len as f64 / 1024.0 / 1024.0 / 1024.0)
     }
 }
 
