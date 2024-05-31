@@ -3,7 +3,7 @@ use clap::Parser;
 use std::{
     fs::{self, Metadata},
     io::{self, Error},
-    os::unix::fs::MetadataExt,
+    os::unix::{ffi::OsStrExt, fs::MetadataExt},
     path::{Path, PathBuf},
 };
 use tabular::{Row, Table};
@@ -199,9 +199,8 @@ fn files_in(path: &Path, args: &Args) -> io::Result<Vec<PathBuf>> {
     for entry in fs::read_dir(path)? {
         let entry = entry?;
         let path = entry.path();
-        let is_hidden = path.file_name().map_or(false, |file_name| {
-            file_name.to_string_lossy().starts_with('.')
-        });
+        let is_hidden = entry.file_name().as_os_str().as_bytes()[0] == b'.';
+
         if args.only_dirs ^ args.only_files {
             if args.only_dirs && path.is_file() {
                 continue;
