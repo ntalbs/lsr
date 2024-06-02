@@ -88,19 +88,17 @@ fn format_mode(mode: u32) -> String {
     perms
 }
 
-fn user_name(md: &Metadata) -> String {
-    let uid = md.uid();
+fn user_name(uid: u32) -> String {
     get_user_by_uid(uid)
         .map(|u| u.name().to_string_lossy().into_owned())
         .unwrap_or_else(|| uid.to_string())
 }
 
-fn group_name(md: &Metadata, show_group: bool) -> String {
+fn group_name(gid: u32, show_group: bool) -> String {
     if !show_group {
         return "".into();
     }
 
-    let gid = md.gid();
     get_group_by_gid(gid)
         .map(|g| g.name().to_string_lossy().into_owned())
         .unwrap_or_else(|| gid.to_string())
@@ -184,8 +182,8 @@ fn format_output_long(paths: &[PathBuf], args: &Args) -> io::Result<String> {
                 .with_cell(file_type(path))
                 .with_cell(format_mode(md.mode()))
                 .with_cell(md.nlink())
-                .with_cell(user_name(&md))
-                .with_cell(group_name(&md, args.group))
+                .with_cell(user_name(md.uid()))
+                .with_cell(group_name(md.gid(), args.group))
                 .with_cell(file_size(&md, args.bytes))
                 .with_cell(modified_date(&md))
                 .with_cell(file_name(path, true)),
