@@ -113,14 +113,14 @@ fn modified_date(md: &Metadata) -> String {
 
 fn file_name(path: &Path, long: bool) -> String {
     if path == PathBuf::from(".") {
-        return ".".into();
+        return "./".into();
     } else if path == PathBuf::from("..") {
-        return "..".into();
+        return "../".into();
     }
 
     let mut name = path
         .file_name()
-        .map(|f| f.to_string_lossy().into_owned())
+        .map(|f| f.to_string_lossy().to_string())
         .unwrap_or_default();
     if long && path.is_symlink() {
         if let Ok(target) = fs::read_link(path) {
