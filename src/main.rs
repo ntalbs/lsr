@@ -90,7 +90,7 @@ fn format_mode(mode: u32) -> String {
 
 fn user_name(uid: u32) -> String {
     get_user_by_uid(uid)
-        .map(|u| u.name().to_string_lossy().into_owned())
+        .map(|u| u.name().to_string_lossy().to_string())
         .unwrap_or_else(|| uid.to_string())
 }
 
@@ -100,7 +100,7 @@ fn group_name(gid: u32, show_group: bool) -> String {
     }
 
     get_group_by_gid(gid)
-        .map(|g| g.name().to_string_lossy().into_owned())
+        .map(|g| g.name().to_string_lossy().to_string())
         .unwrap_or_else(|| gid.to_string())
 }
 
