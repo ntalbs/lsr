@@ -158,7 +158,7 @@ fn format_output_short(paths: &[PathBuf]) -> io::Result<String> {
             cells,
             GridOptions {
                 filling: Filling::Spaces(2),
-                direction: Direction::LeftToRight,
+                direction: Direction::TopToBottom,
                 width: w as usize,
             },
         );
