@@ -58,6 +58,13 @@ pub struct Args {
         help = "List each file's group"
     )]
     group: bool,
+    #[clap(
+        short('1'),
+        long("oneline"),
+        default_value_t = false,
+        help = "Display one entry per line"
+    )]
+    oneline: bool,
 }
 
 fn file_type(path: &Path) -> String {
@@ -148,6 +155,15 @@ fn file_size(md: &Metadata, bytes: bool) -> String {
     } else {
         format!("{:.1}G", len as f64 / 1024.0 / 1024.0 / 1024.0)
     }
+}
+
+fn format_output_oneline(paths: &[PathBuf]) -> io::Result<String> {
+    let mut output = String::new();
+    for p in paths {
+        output.push_str(&file_name(p, false));
+        output.push('\n');
+    }
+    Ok(output)
 }
 
 fn format_output_short(paths: &[PathBuf]) -> io::Result<String> {
@@ -252,7 +268,9 @@ fn main() -> io::Result<()> {
     let (files, directories): (Vec<_>, Vec<_>) = paths.iter().cloned().partition(|f| !f.is_dir());
 
     // print files first
-    if args.long {
+    if args.oneline {
+        print!("{}", format_output_oneline(&files)?)
+    } else if args.long {
         print!("{}", format_output_long(&files, &args)?);
     } else {
         print!("{}", format_output_short(&files)?);
@@ -264,7 +282,9 @@ fn main() -> io::Result<()> {
         if directories.len() > 1 {
             println!("\n{}:", file_name(path, false));
         }
-        if args.long {
+        if args.oneline {
+            print!("{}", format_output_oneline(&paths)?)
+        } else if args.long {
             print!("{}", format_output_long(&paths, &args)?);
         } else {
             print!("{}", format_output_short(&paths)?);
