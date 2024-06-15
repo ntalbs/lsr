@@ -107,11 +107,7 @@ fn user_name(uid: u32) -> String {
         .unwrap_or_else(|| uid.to_string())
 }
 
-fn group_name(gid: u32, show_group: bool) -> String {
-    if !show_group {
-        return "".into();
-    }
-
+fn group_name(gid: u32) -> String {
     get_group_by_gid(gid)
         .map(|g| g.name().to_string_lossy().to_string())
         .unwrap_or_else(|| gid.to_string())
@@ -205,7 +201,7 @@ fn format_output_long(paths: &[PathBuf], args: &Args) -> io::Result<String> {
                 .with_cell(if args.no_permissions { "".to_string() } else { format_mode(md.mode()) })
                 .with_cell(md.nlink())
                 .with_cell(user_name(md.uid()))
-                .with_cell(group_name(md.gid(), args.group))
+                .with_cell(if args.group { group_name(md.gid()) } else { "".to_string() })
                 .with_cell(file_size(&md, args.bytes))
                 .with_cell(modified_date(&md))
                 .with_cell(file_name(path, true)),
