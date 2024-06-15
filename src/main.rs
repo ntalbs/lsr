@@ -65,6 +65,12 @@ pub struct Args {
         help = "Display one entry per line"
     )]
     oneline: bool,
+    #[clap(
+        long("no-permissions"),
+        default_value_t = false,
+        help = "Suppress the permissions field"
+    )]
+    no_permissions: bool,
 }
 
 fn file_type(path: &Path) -> String {
@@ -196,7 +202,7 @@ fn format_output_long(paths: &[PathBuf], args: &Args) -> io::Result<String> {
         table.add_row(
             Row::new()
                 .with_cell(file_type(path))
-                .with_cell(format_mode(md.mode()))
+                .with_cell(if args.no_permissions { "".to_string() } else { format_mode(md.mode()) })
                 .with_cell(md.nlink())
                 .with_cell(user_name(md.uid()))
                 .with_cell(group_name(md.gid(), args.group))
