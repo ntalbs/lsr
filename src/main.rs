@@ -189,6 +189,7 @@ fn format_output_short(paths: &[PathBuf]) -> io::Result<String> {
     }
 }
 
+#[rustfmt::skip]
 fn format_output_long(paths: &[PathBuf], args: &Args) -> io::Result<String> {
     let fmt = "{:<}{:<}  {:>}  {:<}  {:<}  {:>}  {:<}  {:<}";
     let mut table = Table::new(fmt);
