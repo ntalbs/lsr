@@ -195,7 +195,11 @@ fn format_output_long(paths: &[PathBuf], args: &Args) -> io::Result<String> {
     let mut table = Table::new(fmt);
 
     for path in paths {
-        let md = path.metadata()?;
+        let md = if path.is_symlink() {
+            path.symlink_metadata()?
+        } else {
+            path.metadata()?
+        };
         table.add_row(
             Row::new()
                 .with_cell(file_type(path))
