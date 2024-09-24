@@ -9,7 +9,7 @@ use std::{
 use tabular::{Row, Table};
 use term_grid::{Direction, Filling, Grid, GridOptions};
 use terminal_size::{terminal_size, Width};
-use users::{get_group_by_gid, get_user_by_uid};
+use uzers::{get_group_by_gid, get_user_by_uid};
 
 #[derive(Debug, Default, Parser)]
 #[clap(version, about = "A very basic ls clone")]
