@@ -1,5 +1,6 @@
 use chrono::{DateTime, Local};
 use clap::Parser;
+use colored::{ColoredString, Colorize};
 use std::{
     fs::{self, Metadata},
     io::{self, Error},
@@ -73,76 +74,94 @@ pub struct Args {
     no_permissions: bool,
 }
 
-fn file_type(path: &Path) -> String {
+fn file_type(path: &Path) -> ColoredString {
     if path.is_symlink() {
-        "l".to_string()
+        "l".cyan()
     } else if path.is_dir() {
-        "d".to_string()
+        "d".blue()
     } else if path.is_file() {
-        "-".to_string()
+        "-".white()
     } else {
-        "?".to_string()
+        "?".red()
     }
 }
 
+#[rustfmt::skip]
 fn format_mode(mode: u32) -> String {
-    let mut perms = String::new();
-
-    perms.push_str(if mode & 0b100000000 != 0 { "r" } else { "-" });
-    perms.push_str(if mode & 0b010000000 != 0 { "w" } else { "-" });
-    perms.push_str(if mode & 0b001000000 != 0 { "x" } else { "-" });
-    perms.push_str(if mode & 0b000100000 != 0 { "r" } else { "-" });
-    perms.push_str(if mode & 0b000010000 != 0 { "w" } else { "-" });
-    perms.push_str(if mode & 0b000001000 != 0 { "x" } else { "-" });
-    perms.push_str(if mode & 0b000000100 != 0 { "r" } else { "-" });
-    perms.push_str(if mode & 0b000000010 != 0 { "w" } else { "-" });
-    perms.push_str(if mode & 0b000000001 != 0 { "x" } else { "-" });
-
-    perms
+    format!("{}{}{}{}{}{}{}{}{}",
+        if mode & 0b100000000 != 0 { "r".yellow() } else { "-".white() },
+        if mode & 0b010000000 != 0 { "w".red()    } else { "-".white() },
+        if mode & 0b001000000 != 0 { "x".green()  } else { "-".white() },
+        if mode & 0b000100000 != 0 { "r".yellow() } else { "-".white() },
+        if mode & 0b000010000 != 0 { "w".red()    } else { "-".white() },
+        if mode & 0b000001000 != 0 { "x".green()  } else { "-".white() },
+        if mode & 0b000000100 != 0 { "r".yellow() } else { "-".white() },
+        if mode & 0b000000010 != 0 { "w".red()    } else { "-".white() },
+        if mode & 0b000000001 != 0 { "x".green()  } else { "-".white() },
+    )
 }
 
-fn user_name(uid: u32) -> String {
+fn user_name(uid: u32) -> ColoredString {
     get_user_by_uid(uid)
         .map(|u| u.name().to_string_lossy().to_string())
         .unwrap_or_else(|| uid.to_string())
+        .yellow()
 }
 
-fn group_name(gid: u32) -> String {
+fn group_name(gid: u32) -> ColoredString {
     get_group_by_gid(gid)
         .map(|g| g.name().to_string_lossy().to_string())
         .unwrap_or_else(|| gid.to_string())
+        .yellow()
 }
 
 fn modified_date(md: &Metadata) -> String {
     let modified: DateTime<Local> = DateTime::from(md.modified().unwrap());
-    modified.format("%Y-%m-%d %H:%M").to_string()
+    format!(
+        "{} {}",
+        modified.format("%Y-%m-%d").to_string().magenta(),
+        modified.format("%H:%M").to_string().bright_magenta()
+    )
 }
 
 fn file_name(path: &Path, long: bool) -> String {
     if path == PathBuf::from(".") {
-        return "./".into();
+        return format!("{}{}", ".".blue(), "/".white());
     } else if path == PathBuf::from("..") {
-        return "../".into();
+        return format!("{}{}", "..".blue(), "/".white());
     }
 
-    let mut name = path
+    let name = path
         .file_name()
         .map(|f| f.to_string_lossy().to_string())
         .unwrap_or_default();
     if long && path.is_symlink() {
         if let Ok(target) = fs::read_link(path) {
-            name.push_str(" -> ");
-            name.push_str(&target.to_string_lossy());
+            if target.exists() {
+                return format!(
+                    "{}{}{}",
+                    name.cyan(),
+                    " -> ".cyan(),
+                    &target.to_string_lossy().cyan()
+                );
+            } else {
+                return format!(
+                    "{}{}{}",
+                    name.cyan(),
+                    " -> ".red(),
+                    &target.to_string_lossy().red()
+                );
+            }
         }
     } else if path.is_dir() {
-        name.push('/');
+        return format!("{}{}", name.blue(), "/".white());
     }
-    name
+    return format!("{}", name.white());
 }
 
-fn file_size(md: &Metadata, bytes: bool) -> String {
+fn file_size(md: &Metadata, bytes: bool) -> ColoredString {
     if !md.is_file() {
-        return "-".into();
+        return "-".white();
     }
 
     let len = md.len();
@@ -157,6 +176,7 @@ fn file_size(md: &Metadata, bytes: bool) -> String {
     } else {
         format!("{:.1}G", len as f64 / 1024.0 / 1024.0 / 1024.0)
     }
+    .green()
 }
 
 fn format_output_oneline(paths: &[PathBuf]) -> io::Result<String> {
@@ -206,7 +226,7 @@ fn format_output_long(paths: &[PathBuf], args: &Args) -> io::Result<String> {
                 .with_cell(if args.no_permissions { "".to_string() } else { format_mode(md.mode()) })
                 .with_cell(md.nlink())
                 .with_cell(user_name(md.uid()))
-                .with_cell(if args.group { group_name(md.gid()) } else { "".to_string() })
+                .with_cell(if args.group { group_name(md.gid()) } else { "".white() })
                 .with_cell(file_size(&md, args.bytes))
                 .with_cell(modified_date(&md))
                 .with_cell(file_name(path, true)),
