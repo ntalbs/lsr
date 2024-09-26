@@ -135,23 +135,27 @@ fn file_name(path: &Path, long: bool) -> String {
         .file_name()
         .map(|f| f.to_string_lossy().to_string())
         .unwrap_or_default();
-    if long && path.is_symlink() {
-        if let Ok(target) = fs::read_link(path) {
-            if target.exists() {
-                return format!(
-                    "{}{}{}",
-                    name.cyan(),
-                    " -> ".cyan(),
-                    &target.to_string_lossy().cyan()
-                );
-            } else {
-                return format!(
-                    "{}{}{}",
-                    name.cyan(),
-                    " -> ".red(),
-                    &target.to_string_lossy().red()
-                );
+    if path.is_symlink() {
+        if long {
+            if let Ok(target) = fs::read_link(path) {
+                if target.exists() {
+                    return format!(
+                        "{}{}{}",
+                        name.cyan(),
+                        " -> ".cyan(),
+                        &target.to_string_lossy().cyan()
+                    );
+                } else {
+                    return format!(
+                        "{}{}{}",
+                        name.cyan(),
+                        " -> ".red(),
+                        &target.to_string_lossy().red()
+                    );
+                }
             }
+        } else {
+            return format!("{}{}", name.cyan(), "@".white());
         }
     } else if path.is_dir() {
         return format!("{}{}", name.blue(), "/".white());
@@ -182,7 +186,7 @@ fn file_size(md: &Metadata, bytes: bool) -> ColoredString {
 fn format_output_oneline(paths: &[PathBuf]) -> io::Result<String> {
     let mut output = String::new();
     for p in paths {
-        output.push_str(&file_name(p, false));
+        output.push_str(&file_name(p, true));
         output.push('\n');
     }
     Ok(output)
