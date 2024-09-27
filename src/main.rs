@@ -74,12 +74,12 @@ pub struct Args {
     no_permissions: bool,
 }
 
-fn file_type(path: &Path) -> ColoredString {
-    if path.is_symlink() {
+fn file_type(md: &Metadata) -> ColoredString {
+    if md.is_symlink() {
         "l".cyan()
-    } else if path.is_dir() {
+    } else if md.is_dir() {
         "d".blue()
-    } else if path.is_file() {
+    } else if md.is_file() {
         "-".white()
     } else {
         "?".red()
@@ -87,8 +87,10 @@ fn file_type(path: &Path) -> ColoredString {
 }
 
 #[rustfmt::skip]
-fn format_mode(mode: u32) -> String {
-    format!("{}{}{}{}{}{}{}{}{}",
+fn format_mode(md: &Metadata) -> String {
+    let mode = md.mode();
+    format!("{}{}{}{}{}{}{}{}{}{}",
+        file_type(md),
         if mode & 0b100000000 != 0 { "r".yellow() } else { "-".white() },
         if mode & 0b010000000 != 0 { "w".red()    } else { "-".white() },
         if mode & 0b001000000 != 0 { "x".green()  } else { "-".white() },
@@ -215,7 +217,7 @@ fn format_output_short(paths: &[PathBuf]) -> io::Result<String> {
 
 #[rustfmt::skip]
 fn format_output_long(paths: &[PathBuf], args: &Args) -> io::Result<String> {
-    let fmt = "{:<}{:<}  {:>}  {:<}  {:<}  {:>}  {:<}  {:<}";
+    let fmt = "{:<}  {:>}  {:<}  {:<}  {:>}  {:<}  {:<}";
     let mut table = Table::new(fmt);
 
     for path in paths {
@@ -226,8 +228,7 @@ fn format_output_long(paths: &[PathBuf], args: &Args) -> io::Result<String> {
         };
         table.add_row(
             Row::new()
-                .with_cell(file_type(path))
-                .with_cell(if args.no_permissions { "".to_string() } else { format_mode(md.mode()) })
+                .with_cell(if args.no_permissions { "".to_string() } else { format_mode(&md) })
                 .with_cell(md.nlink())
                 .with_cell(user_name(md.uid()))
                 .with_cell(if args.group { group_name(md.gid()) } else { "".white() })
