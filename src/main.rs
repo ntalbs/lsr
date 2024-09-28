@@ -170,7 +170,7 @@ fn file_name(path: &Path, long: bool) -> String {
     } else if path.is_dir() {
         return format!("{}{}", name.blue(), "/".white());
     }
-    return format!("{}", name.white());
+    format!("{}", name.white())
 }
 
 fn file_size(md: &Metadata, bytes: bool) -> ColoredString {
