@@ -2,9 +2,9 @@ use chrono::{DateTime, Local};
 use clap::Parser;
 use colored::{ColoredString, Colorize};
 use std::{
-    fs::{self, Metadata},
+    fs::{self, FileType, Metadata},
     io::{self, Error},
-    os::unix::{ffi::OsStrExt, fs::MetadataExt},
+    os::unix::{ffi::OsStrExt, fs::{FileTypeExt, MetadataExt}},
     path::{Path, PathBuf},
 };
 use tabular::{Row, Table};
@@ -74,13 +74,21 @@ pub struct Args {
     no_permissions: bool,
 }
 
-fn file_type(md: &Metadata) -> ColoredString {
-    if md.is_symlink() {
+fn file_type(file_type: FileType) -> ColoredString {
+    if file_type.is_symlink() {
         "l".cyan()
-    } else if md.is_dir() {
+    } else if file_type.is_dir() {
         "d".blue()
-    } else if md.is_file() {
+    } else if file_type.is_file() {
         "-".white()
+    } else if file_type.is_block_device() {
+        "b".yellow()
+    } else if file_type.is_char_device() {
+        "c".magenta()
+    } else if file_type.is_fifo() {
+        "p".blue()
+    } else if file_type.is_socket() {
+        "s".green()
     } else {
         "?".red()
     }
@@ -90,7 +98,7 @@ fn file_type(md: &Metadata) -> ColoredString {
 fn format_mode(md: &Metadata) -> String {
     let mode = md.mode();
     format!("{}{}{}{}{}{}{}{}{}{}",
-        file_type(md),
+        file_type(md.file_type()),
         if mode & 0b100000000 != 0 { "r".yellow() } else { "-".white() },
         if mode & 0b010000000 != 0 { "w".red()    } else { "-".white() },
         if mode & 0b001000000 != 0 { "x".green()  } else { "-".white() },
