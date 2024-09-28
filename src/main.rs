@@ -21,14 +21,14 @@ pub struct Args {
         short('l'),
         long("long"),
         default_value_t = false,
-        help = "Show hidden and 'dot' files including '.' and '..' directories"
+        help = "Display extended file metadata as a table"
     )]
     long: bool,
     #[clap(
         short('a'),
         long("all"),
         default_value_t = false,
-        help = "Display extended file metadata as a table"
+        help = "Show hidden and 'dot' files including '.' and '..' directories"
     )]
     all: bool,
     #[clap(
