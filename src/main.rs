@@ -4,13 +4,24 @@ use colored::{ColoredString, Colorize};
 use std::{
     fs::{self, FileType, Metadata},
     io::{self, Error},
-    os::unix::{ffi::OsStrExt, fs::{FileTypeExt, MetadataExt}},
+    os::unix::{
+        ffi::OsStrExt,
+        fs::{FileTypeExt, MetadataExt},
+    },
     path::{Path, PathBuf},
 };
 use tabular::{Row, Table};
 use term_grid::{Direction, Filling, Grid, GridOptions};
 use terminal_size::{terminal_size, Width};
 use uzers::{get_group_by_gid, get_user_by_uid};
+
+#[derive(clap::ValueEnum, Clone, Copy, Default, Debug)]
+enum TimeStyle {
+    #[default]
+    Default,
+    Iso,
+    Relative,
+}
 
 #[derive(Debug, Default, Parser)]
 #[clap(version, about = "A very basic ls clone")]
@@ -72,6 +83,13 @@ pub struct Args {
         help = "Suppress the permissions field"
     )]
     no_permissions: bool,
+    #[clap(
+        long("time-style"),
+        default_value = "default",
+        ignore_case = true,
+        help = "Time format"
+    )]
+    time_style: TimeStyle,
 }
 
 fn file_type(file_type: FileType) -> ColoredString {
@@ -125,13 +143,59 @@ fn group_name(gid: u32) -> ColoredString {
         .yellow()
 }
 
-fn modified_date(md: &Metadata) -> String {
+fn modified_date(md: &Metadata, time_style: TimeStyle) -> String {
     let modified: DateTime<Local> = DateTime::from(md.modified().unwrap());
+    match time_style {
+        TimeStyle::Default => date_default(modified),
+        TimeStyle::Iso => date_iso(modified),
+        TimeStyle::Relative => date_relative(modified),
+    }
+}
+
+fn date_default(date_time: DateTime<Local>) -> String {
+    let now = Local::now();
+    let duration = now - date_time;
+
+    if duration.num_days() / 365 > 1 {
+        format!("{}", date_time.format("%e %b  %Y").to_string().magenta())
+    } else {
+        format!("{} {}", date_time.format("%e %b").to_string().magenta(), date_time.format("%H:%M").to_string().bright_magenta())
+    }
+}
+
+fn date_iso(date_time: DateTime<Local>) -> String {
     format!(
         "{} {}",
-        modified.format("%Y-%m-%d").to_string().magenta(),
-        modified.format("%H:%M").to_string().bright_magenta()
+        date_time.format("%Y-%m-%d").to_string().magenta(),
+        date_time.format("%H:%M").to_string().bright_magenta()
     )
+}
+
+fn date_relative(date_time: DateTime<Local>) -> String {
+    fn pluralize(n: i64, s: &str) -> String {
+        let unit = if n == 1 {
+            s.to_string()
+        } else {
+            format!("{}s", s)
+        };
+        format!("{:>2} {}", n.to_string().bright_magenta(), unit.magenta())
+    }
+
+    let now = Local::now();
+    let duration = now - date_time;
+    if duration.num_minutes() < 1 {
+        pluralize(duration.num_seconds(), "second")
+    } else if duration.num_hours() < 1 {
+        pluralize(duration.num_minutes(), "minute")
+    } else if duration.num_days() < 1 {
+        pluralize(duration.num_hours(), "hour")
+    } else if duration.num_days() < 30 {
+        pluralize(duration.num_days(), "day")
+    } else if duration.num_days() < 365 {
+        pluralize(duration.num_days() / 30, "month")
+    } else {
+        pluralize(duration.num_days() / 365, "year")
+    }
 }
 
 fn file_name(path: &Path, long: bool) -> String {
@@ -241,7 +305,7 @@ fn format_output_long(paths: &[PathBuf], args: &Args) -> io::Result<String> {
                 .with_cell(user_name(md.uid()))
                 .with_cell(if args.group { group_name(md.gid()) } else { "".white() })
                 .with_cell(file_size(&md, args.bytes))
-                .with_cell(modified_date(&md))
+                .with_cell(modified_date(&md, args.time_style))
                 .with_cell(file_name(path, true)),
         );
     }
