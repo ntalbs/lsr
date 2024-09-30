@@ -159,7 +159,11 @@ fn date_default(date_time: DateTime<Local>) -> String {
     if duration.num_days() / 365 > 1 {
         format!("{}", date_time.format("%e %b  %Y").to_string().magenta())
     } else {
-        format!("{} {}", date_time.format("%e %b").to_string().magenta(), date_time.format("%H:%M").to_string().bright_magenta())
+        format!(
+            "{} {}",
+            date_time.format("%e %b").to_string().magenta(),
+            date_time.format("%H:%M").to_string().bright_magenta()
+        )
     }
 }
 
