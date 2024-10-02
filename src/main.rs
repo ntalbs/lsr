@@ -71,6 +71,13 @@ pub struct Args {
     )]
     group: bool,
     #[clap(
+        short('H'),
+        long("links"),
+        default_value_t = false,
+        help = "List each file's number of hard links"
+    )]
+    links: bool,
+    #[clap(
         short('1'),
         long("oneline"),
         default_value_t = false,
@@ -305,7 +312,7 @@ fn format_output_long(paths: &[PathBuf], args: &Args) -> io::Result<String> {
         table.add_row(
             Row::new()
                 .with_cell(if args.no_permissions { "".to_string() } else { format_mode(&md) })
-                .with_cell(md.nlink())
+                .with_cell(if args.links { md.nlink().to_string() } else { "".to_string() })
                 .with_cell(user_name(md.uid()))
                 .with_cell(if args.group { group_name(md.gid()) } else { "".white() })
                 .with_cell(file_size(&md, args.bytes))
