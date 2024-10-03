@@ -71,6 +71,13 @@ pub struct Args {
     )]
     group: bool,
     #[clap(
+        short('i'),
+        long("inode"),
+        default_value_t = false,
+        help = "List each file's inode number"
+    )]
+    inode: bool,
+    #[clap(
         short('H'),
         long("links"),
         default_value_t = false,
@@ -300,7 +307,7 @@ fn format_output_short(paths: &[PathBuf]) -> io::Result<String> {
 
 #[rustfmt::skip]
 fn format_output_long(paths: &[PathBuf], args: &Args) -> io::Result<String> {
-    let fmt = "{:<}  {:>}  {:<}  {:<}  {:>}  {:<}  {:<}";
+    let fmt = "{:>} {:<}  {:>}  {:<}  {:<}  {:>}  {:<}  {:<}";
     let mut table = Table::new(fmt);
 
     for path in paths {
@@ -311,6 +318,7 @@ fn format_output_long(paths: &[PathBuf], args: &Args) -> io::Result<String> {
         };
         table.add_row(
             Row::new()
+                .with_cell(if args.inode { md.ino().to_string().cyan() } else { "".white() })
                 .with_cell(if args.no_permissions { "".to_string() } else { format_mode(&md) })
                 .with_cell(if args.links { md.nlink().to_string() } else { "".to_string() })
                 .with_cell(user_name(md.uid()))
