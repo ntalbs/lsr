@@ -16,6 +16,8 @@ Options:
   -D, --only-dirs                List only directories
   -f, --only-files               List only files
   -g, --group                    List each file's group
+  -i, --inode                    List each file's inode number
+  -H, --links                    List each file's number of hard links
   -1, --oneline                  Display one entry per line
       --no-permissions           Suppress the permissions field
       --time-style <TIME_STYLE>  Time format [default: default] [possible values: default, iso, relative]
