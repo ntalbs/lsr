@@ -314,14 +314,14 @@ fn format_output_long(paths: &[PathBuf], args: &Args) -> io::Result<String> {
         };
         table.add_row(
             Row::new()
-                .with_cell(if args.inode { md.ino().to_string().cyan() } else { "".white() })
-                .with_cell(if args.no_permissions { "".to_string() } else { format_mode(&md) })
-                .with_cell(if args.links { md.nlink().to_string() } else { "".to_string() })
-                .with_cell(user_name(md.uid()))
-                .with_cell(if args.group { group_name(md.gid()) } else { "".white() })
-                .with_cell(file_size(&md, args.bytes))
-                .with_cell(modified_date(&md, args.time_style))
-                .with_cell(file_name(path, true)),
+                .with_ansi_cell(if args.inode { md.ino().to_string().cyan() } else { "".white() })
+                .with_ansi_cell(if args.no_permissions { "".to_string() } else { format_mode(&md) })
+                .with_ansi_cell(if args.links { md.nlink().to_string() } else { "".to_string() })
+                .with_ansi_cell(user_name(md.uid()))
+                .with_ansi_cell(if args.group { group_name(md.gid()) } else { "".white() })
+                .with_ansi_cell(file_size(&md, args.bytes))
+                .with_ansi_cell(modified_date(&md, args.time_style))
+                .with_ansi_cell(file_name(path, true))
         );
     }
     Ok(format!("{table}"))
