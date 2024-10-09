@@ -7,7 +7,7 @@ edition = "2021"
 chrono = "0.4"
 clap = { version = "4", features = ["derive"] }
 colored = "2"
-terminal_size = "0.3"
 tabular = "0.2"
+terminal_size = "0.4"
 uzers = "0.12"
 uutils_term_grid = "0.6"
