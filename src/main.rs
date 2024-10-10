@@ -1,6 +1,7 @@
 use chrono::{DateTime, Local};
 use clap::Parser;
 use colored::{ColoredString, Colorize};
+use core::str;
 use std::{
     fs::{self, FileType, Metadata},
     io::{self, Error},
@@ -104,6 +105,13 @@ pub struct Args {
         help = "Time format"
     )]
     time_style: TimeStyle,
+    #[clap(
+        short('@'),
+        long("extended"),
+        default_value_t = false,
+        help = "list each file's extended attributes"
+    )]
+    extended: bool,
 }
 
 fn file_type(file_type: FileType) -> ColoredString {
@@ -127,9 +135,9 @@ fn file_type(file_type: FileType) -> ColoredString {
 }
 
 #[rustfmt::skip]
-fn format_mode(md: &Metadata) -> String {
+fn format_mode(md: &Metadata, has_xattr: bool) -> String {
     let mode = md.mode();
-    format!("{}{}{}{}{}{}{}{}{}{}",
+    format!("{}{}{}{}{}{}{}{}{}{}{}",
         file_type(md.file_type()),
         if mode & 0b100000000 != 0 { "r".yellow() } else { "-".white() },
         if mode & 0b010000000 != 0 { "w".red()    } else { "-".white() },
@@ -140,6 +148,7 @@ fn format_mode(md: &Metadata) -> String {
         if mode & 0b000000100 != 0 { "r".yellow() } else { "-".white() },
         if mode & 0b000000010 != 0 { "w".red()    } else { "-".white() },
         if mode & 0b000000001 != 0 { "x".green()  } else { "-".white() },
+        if has_xattr { "@" } else { "" }
     )
 }
 
@@ -303,7 +312,7 @@ fn format_output_short(paths: &[PathBuf]) -> io::Result<String> {
 
 #[rustfmt::skip]
 fn format_output_long(paths: &[PathBuf], args: &Args) -> io::Result<String> {
-    let fmt = "{:>} {:<}  {:>}  {:<}  {:<}  {:>}  {:<}  {:<}";
+    let fmt = "{:>} {:<} {:>} {:<} {:<} {:>} {:<} {:<}";
     let mut table = Table::new(fmt);
 
     for path in paths {
@@ -312,10 +321,15 @@ fn format_output_long(paths: &[PathBuf], args: &Args) -> io::Result<String> {
         } else {
             path.metadata()?
         };
+
+        let mut xattrs = xattr::list(path)?
+            .map(|attr| attr.to_string_lossy().to_string())
+            .peekable();
+
         table.add_row(
             Row::new()
                 .with_ansi_cell(if args.inode { md.ino().to_string().cyan() } else { "".white() })
-                .with_ansi_cell(if args.no_permissions { "".to_string() } else { format_mode(&md) })
+                .with_ansi_cell(if args.no_permissions { "".to_string() } else { format_mode(&md, xattrs.peek().is_some()) })
                 .with_ansi_cell(if args.links { md.nlink().to_string() } else { "".to_string() })
                 .with_ansi_cell(user_name(md.uid()))
                 .with_ansi_cell(if args.group { group_name(md.gid()) } else { "".white() })
@@ -323,6 +337,23 @@ fn format_output_long(paths: &[PathBuf], args: &Args) -> io::Result<String> {
                 .with_ansi_cell(modified_date(&md, args.time_style))
                 .with_ansi_cell(file_name(path, true))
         );
+        if args.extended {
+            while let Some(attr) = xattrs.next() {
+                table.add_row(
+                    Row::new()
+                        .with_ansi_cell("")
+                        .with_ansi_cell("")
+                        .with_ansi_cell("")
+                        .with_ansi_cell("")
+                        .with_ansi_cell("")
+                        .with_ansi_cell("")
+                        .with_ansi_cell("")
+                        .with_ansi_cell(
+                            if xattrs.peek().is_none() { format!("└── {attr}") } else { format!("├── {attr}") }
+                        ),
+                );
+            }
+        }
     }
     Ok(format!("{table}"))
 }

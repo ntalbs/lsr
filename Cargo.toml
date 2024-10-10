@@ -11,3 +11,4 @@ tabular = { version = "0.2", features = ["ansi-cell"] }
 terminal_size = "0.4"
 uzers = "0.12"
 uutils_term_grid = "0.6"
+xattr = "1"
