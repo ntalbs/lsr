@@ -21,6 +21,7 @@ Options:
   -1, --oneline                  Display one entry per line
       --no-permissions           Suppress the permissions field
       --time-style <TIME_STYLE>  Time format [default: default] [possible values: default, iso, relative]
+  -@, --extended                 list each file's extended attributes
   -h, --help                     Print help
   -V, --version                  Print version
 ```
