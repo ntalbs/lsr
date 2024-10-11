@@ -26,7 +26,7 @@ enum TimeStyle {
 
 #[derive(Debug, Default, Parser)]
 #[clap(version, about = "A very basic ls clone")]
-pub struct Args {
+struct Args {
     #[clap(default_value = ".", help = "List of files/directories")]
     paths: Vec<String>,
     #[clap(
