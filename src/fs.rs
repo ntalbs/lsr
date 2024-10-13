@@ -52,7 +52,7 @@ pub(crate) fn user_name(uid: u32) -> ColoredString {
     get_user_by_uid(uid)
         .map(|u| u.name().to_string_lossy().to_string())
         .unwrap_or_else(|| uid.to_string())
-        .yellow()
+        .bright_yellow()
 }
 
 pub(crate) fn group_name(gid: u32) -> ColoredString {
