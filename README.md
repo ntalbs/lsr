@@ -10,8 +10,8 @@ Arguments:
   [PATHS]...  List of files/directories [default: .]
 
 Options:
-  -l, --long                     Display extended file metadata as a table
   -a, --all                      Show hidden and 'dot' files including '.' and '..' directories
+  -l, --long                     Display extended file metadata as a table
   -B, --bytes                    List file sizes in bytes, without any prefixes
   -D, --only-dirs                List only directories
   -f, --only-files               List only files
