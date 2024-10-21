@@ -1,4 +1,4 @@
-use clap::Parser;
+use clap::{ArgAction, Parser};
 
 #[derive(clap::ValueEnum, Clone, Copy, Default, Debug)]
 pub(crate) enum TimeStyle {
@@ -17,10 +17,11 @@ pub(crate) struct Args {
     #[clap(
         short('a'),
         long("all"),
-        default_value_t = false,
+        action = ArgAction::Count,
+        default_value_t = 0,
         help = "Show hidden and 'dot' files including '.' and '..' directories"
     )]
-    pub(crate) all: bool,
+    pub(crate) all: u8,
 
     #[clap(
         short('l'),

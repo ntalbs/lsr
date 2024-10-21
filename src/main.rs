@@ -107,14 +107,14 @@ fn files_in(path: &Path, args: &Args) -> io::Result<Vec<PathBuf>> {
                 continue;
             }
         }
-        if args.all || !is_hidden {
+        if args.all > 0 || !is_hidden {
             results.push(path);
         }
     }
 
     results.sort();
 
-    if args.all {
+    if args.all >= 2 {
         results.insert(0, PathBuf::from("."));
         results.insert(1, PathBuf::from(".."));
     }
