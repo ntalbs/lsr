@@ -19,7 +19,7 @@ pub(crate) struct Args {
         long("all"),
         action = ArgAction::Count,
         default_value_t = 0,
-        help = "Show hidden and 'dot' files including '.' and '..' directories"
+        help = "Show hidden and 'dot' files.\nUse this twice to also show '.' and '..' directories"
     )]
     pub(crate) all: u8,
 
