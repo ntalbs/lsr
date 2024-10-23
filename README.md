@@ -12,6 +12,7 @@ Arguments:
 Options:
   -a, --all...                   Show hidden and 'dot' files.
                                  Use this twice to also show '.' and '..' directories
+  -x, --across                   Sort the grid across, rather than downwards
   -l, --long                     Display extended file metadata as a table
   -B, --bytes                    List file sizes in bytes, without any prefixes
   -D, --only-dirs                List only directories
