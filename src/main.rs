@@ -23,7 +23,7 @@ fn format_output_oneline(paths: &[PathBuf]) -> io::Result<String> {
     Ok(output)
 }
 
-fn format_output_short(paths: &[PathBuf]) -> io::Result<String> {
+fn format_output_short(paths: &[PathBuf], across: bool) -> io::Result<String> {
     let term_size = terminal_size();
     if let Some((Width(w), _)) = term_size {
         let cells = paths.iter().map(|p| file_name(p, false)).collect();
@@ -31,7 +31,7 @@ fn format_output_short(paths: &[PathBuf]) -> io::Result<String> {
             cells,
             GridOptions {
                 filling: Filling::Spaces(2),
-                direction: Direction::TopToBottom,
+                direction: if across { Direction::LeftToRight } else { Direction::TopToBottom },
                 width: w as usize,
             },
         );
@@ -157,7 +157,7 @@ fn main() -> io::Result<()> {
     } else if args.long {
         print!("{}", format_output_long(&files, &args)?);
     } else {
-        print!("{}", format_output_short(&files)?);
+        print!("{}", format_output_short(&files, args.across)?);
     }
 
     // print directories
@@ -171,7 +171,7 @@ fn main() -> io::Result<()> {
         } else if args.long {
             print!("{}", format_output_long(&paths, &args)?);
         } else {
-            print!("{}", format_output_short(&paths)?);
+            print!("{}", format_output_short(&paths, args.across)?);
         }
     }
 

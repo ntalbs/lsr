@@ -24,6 +24,14 @@ pub(crate) struct Args {
     pub(crate) all: u8,
 
     #[clap(
+        short('x'),
+        long("across"),
+        default_value_t = false,
+        help = "Sort the grid across, rather than downwards"
+    )]
+    pub(crate) across: bool,
+
+    #[clap(
         short('l'),
         long("long"),
         default_value_t = false,
