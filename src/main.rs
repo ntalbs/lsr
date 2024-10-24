@@ -31,7 +31,11 @@ fn format_output_short(paths: &[PathBuf], across: bool) -> io::Result<String> {
             cells,
             GridOptions {
                 filling: Filling::Spaces(2),
-                direction: if across { Direction::LeftToRight } else { Direction::TopToBottom },
+                direction: if across {
+                    Direction::LeftToRight
+                } else {
+                    Direction::TopToBottom
+                },
                 width: w as usize,
             },
         );
