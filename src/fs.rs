@@ -48,6 +48,15 @@ pub(crate) fn format_mode(md: &Metadata, has_xattr: bool) -> String {
     )
 }
 
+pub(crate) fn xattrs(path: &Path) -> Vec<String> {
+    match xattr::list(path) {
+        Ok(attrs) => attrs
+            .map(|attr| attr.to_string_lossy().to_string())
+            .collect(),
+        Err(_) => vec![]
+    }
+}
+
 pub(crate) fn user_name(uid: u32) -> ColoredString {
     get_user_by_uid(uid)
         .map(|u| u.name().to_string_lossy().to_string())

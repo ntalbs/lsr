@@ -60,9 +60,8 @@ fn format_output_long(paths: &[PathBuf], args: &Args) -> io::Result<String> {
             path.metadata()?
         };
 
-        let mut xattrs = xattr::list(path)?
-            .map(|attr| attr.to_string_lossy().to_string())
-            .peekable();
+        let xattrs = xattrs(path);
+        let mut xattrs = xattrs.iter().peekable();
 
         table.add_row(
             Row::new()
