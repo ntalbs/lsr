@@ -53,7 +53,7 @@ pub(crate) fn xattrs(path: &Path) -> Vec<String> {
         Ok(attrs) => attrs
             .map(|attr| attr.to_string_lossy().to_string())
             .collect(),
-        Err(_) => vec![]
+        Err(_) => vec![],
     }
 }
 
