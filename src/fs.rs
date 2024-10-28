@@ -1,5 +1,6 @@
 use std::{
     fs::{self, FileType, Metadata},
+    io,
     os::unix::fs::{FileTypeExt, MetadataExt},
     path::{Path, PathBuf},
 };
@@ -27,6 +28,14 @@ pub(crate) fn file_type(file_type: FileType) -> ColoredString {
         "s".green()
     } else {
         "?".red()
+    }
+}
+
+pub(crate) fn metadata(path: &Path) -> io::Result<fs::Metadata> {
+    if path.is_symlink() {
+        path.symlink_metadata()
+    } else {
+        path.metadata()
     }
 }
 

@@ -54,12 +54,7 @@ fn format_output_long(paths: &[PathBuf], args: &Args) -> io::Result<String> {
     let mut table = Table::new(fmt);
 
     for path in paths {
-        let md = if path.is_symlink() {
-            path.symlink_metadata()?
-        } else {
-            path.metadata()?
-        };
-
+        let md = metadata(path)?;
         let xattrs = xattrs(path);
         let mut xattrs = xattrs.iter().peekable();
 
