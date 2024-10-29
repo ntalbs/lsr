@@ -137,9 +137,9 @@ pub(crate) fn date_relative(date_time: DateTime<Local>) -> String {
 
 pub(crate) fn file_name(path: &Path, long: bool) -> String {
     if path == PathBuf::from(".") {
-        return format!("{}{}", ".".blue(), "/".white());
+        return format!("{}/", ".".blue());
     } else if path == PathBuf::from("..") {
-        return format!("{}{}", "..".blue(), "/".white());
+        return format!("{}/", "..".blue());
     }
 
     let name = path
@@ -166,10 +166,10 @@ pub(crate) fn file_name(path: &Path, long: bool) -> String {
                 }
             }
         } else {
-            return format!("{}{}", name.cyan(), "@".white());
+            return format!("{}@", name.cyan());
         }
     } else if path.is_dir() {
-        return format!("{}{}", name.blue(), "/".white());
+        return format!("{}/", name.blue());
     }
     name
 }
