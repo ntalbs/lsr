@@ -171,7 +171,7 @@ pub(crate) fn file_name(path: &Path, long: bool) -> String {
     } else if path.is_dir() {
         return format!("{}{}", name.blue(), "/".white());
     }
-    format!("{}", name.white())
+    name
 }
 
 pub(crate) fn file_size(md: &Metadata, bytes: bool) -> ColoredString {
