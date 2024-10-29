@@ -146,7 +146,9 @@ pub(crate) fn file_name(path: &Path, long: bool) -> String {
         .file_name()
         .map(|f| f.to_string_lossy().to_string())
         .unwrap_or_default();
-    if path.is_symlink() {
+    let file_type = metadata(path).unwrap().file_type();
+
+    if file_type.is_symlink() {
         if long {
             if let Ok(target) = fs::read_link(path) {
                 if target.exists() {
@@ -168,7 +170,7 @@ pub(crate) fn file_name(path: &Path, long: bool) -> String {
         } else {
             return format!("{}@", name.cyan());
         }
-    } else if path.is_dir() {
+    } else if file_type.is_dir() {
         return format!("{}/", name.blue());
     }
     name
