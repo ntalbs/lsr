@@ -172,6 +172,10 @@ pub(crate) fn file_name(path: &Path, long: bool) -> String {
         }
     } else if file_type.is_dir() {
         return format!("{}/", name.blue());
+    } else if file_type.is_fifo() {
+        return format!("{}|", name.yellow());
+    } else if file_type.is_socket() {
+        return format!("{}=", name.red());
     }
     name
 }
