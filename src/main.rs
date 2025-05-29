@@ -41,10 +41,7 @@ fn format_output_short(paths: &[PathBuf], across: bool) -> io::Result<String> {
         );
         Ok(format!("{grid}"))
     } else {
-        Err(Error::new(
-            io::ErrorKind::Other,
-            "Failed to get terminal width.",
-        ))
+        Err(Error::other("Failed to get terminal width."))
     }
 }
 
