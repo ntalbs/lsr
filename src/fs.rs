@@ -113,7 +113,7 @@ pub(crate) fn date_relative(date_time: DateTime<Local>) -> String {
         let unit = if n == 1 {
             s.to_string()
         } else {
-            format!("{}s", s)
+            format!("{s}s")
         };
         format!("{:>2} {}", n.to_string().bright_magenta(), unit.magenta())
     }
