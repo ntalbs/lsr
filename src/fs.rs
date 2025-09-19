@@ -146,7 +146,10 @@ pub(crate) fn file_name(path: &Path, long: bool) -> String {
         .file_name()
         .map(|f| f.to_string_lossy().to_string())
         .unwrap_or_default();
-    let file_type = metadata(path).unwrap().file_type();
+
+    let md = metadata(path).unwrap();
+    let file_type = md.file_type();
+    let is_executable = md.mode() & 0b001001001 != 0;
 
     if file_type.is_symlink() {
         if long {
@@ -156,7 +159,7 @@ pub(crate) fn file_name(path: &Path, long: bool) -> String {
                         "{}{}{}",
                         name.cyan(),
                         " -> ".cyan(),
-                        &target.to_string_lossy().cyan()
+                        file_name(&target, false)
                     );
                 } else {
                     return format!(
@@ -176,6 +179,8 @@ pub(crate) fn file_name(path: &Path, long: bool) -> String {
         return format!("{}|", name.yellow());
     } else if file_type.is_socket() {
         return format!("{}=", name.red());
+    } else if is_executable {
+        return format!("{}*", name.green());
     }
     name
 }
