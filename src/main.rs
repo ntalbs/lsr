@@ -47,7 +47,7 @@ fn format_output_short(paths: &[PathBuf], across: bool) -> io::Result<String> {
 
 #[rustfmt::skip]
 fn format_output_long(paths: &[PathBuf], args: &Args) -> io::Result<String> {
-    let fmt = "{:>} {:<} {:>} {:<} {:<} {:>} {:<} {:<}";
+    let fmt = "{:>} {:<} {:>} {:<} {:<} {:>} {:<} {:<} {:<} {:<} {:<} {:<}";
     let mut table = Table::new(fmt);
 
     for path in paths {
@@ -63,31 +63,21 @@ fn format_output_long(paths: &[PathBuf], args: &Args) -> io::Result<String> {
                 .with_ansi_cell(user_name(md.uid()))
                 .with_ansi_cell(if args.group { group_name(md.gid()) } else { "".white() })
                 .with_ansi_cell(file_size(&md, args.bytes))
-                .with_ansi_cell({
-                    let mut dates = vec![];
-                    if args.modified {
-                        dates.push(modified_date(&md, args.time_style));
-                    }
-                    if args.accessed {
-                        dates.push(accessed_date(&md, args.time_style));
-                    }
-                    if args.created {
-                        dates.push(created_date(&md, args.time_style));
-                    }
-                    if args.changed {
-                        dates.push(changed_date(&md, args.time_style));
-                    }
-                    if dates.is_empty() {
-                        dates.push(modified_date(&md, args.time_style));
-                    }
-                    dates.join(" ")
-                })
+                .with_ansi_cell(if args.modified { modified_date(&md, args.time_style) } else { "\u{8}".to_string()})
+                .with_ansi_cell(if args.accessed { accessed_date(&md, args.time_style) } else { "\u{8}".to_string()})
+                .with_ansi_cell(if args.created { created_date(&md, args.time_style) } else { "\u{8}".to_string()})
+                .with_ansi_cell(if args.changed { changed_date(&md, args.time_style) } else { "\u{8}".to_string()})
+                .with_ansi_cell(if args.modified || args.accessed || args.created || args.changed { "\u{8}".to_string() } else { modified_date(&md, args.time_style) })
                 .with_ansi_cell(file_name(path, true))
         );
         if args.extended {
             while let Some(attr) = xattrs.next() {
                 table.add_row(
                     Row::new()
+                        .with_ansi_cell("")
+                        .with_ansi_cell("")
+                        .with_ansi_cell("")
+                        .with_ansi_cell("")
                         .with_ansi_cell("")
                         .with_ansi_cell("")
                         .with_ansi_cell("")
