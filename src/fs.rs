@@ -80,13 +80,32 @@ pub(crate) fn group_name(gid: u32) -> ColoredString {
         .yellow()
 }
 
-pub(crate) fn modified_date(md: &Metadata, time_style: TimeStyle) -> String {
-    let modified: DateTime<Local> = DateTime::from(md.modified().unwrap());
+fn format_date(date_time: DateTime<Local>, time_style: TimeStyle) -> String {
     match time_style {
-        TimeStyle::Default => date_default(modified),
-        TimeStyle::Iso => date_iso(modified),
-        TimeStyle::Relative => date_relative(modified),
+        TimeStyle::Default => date_default(date_time),
+        TimeStyle::Iso => date_iso(date_time),
+        TimeStyle::Relative => date_relative(date_time),
     }
+}
+
+pub(crate) fn modified_date(md: &Metadata, time_style: TimeStyle) -> String {
+    format_date(DateTime::from(md.modified().unwrap()), time_style)
+}
+
+pub(crate) fn accessed_date(md: &Metadata, time_style: TimeStyle) -> String {
+    format_date(DateTime::from(md.accessed().unwrap()), time_style)
+}
+
+pub(crate) fn created_date(md: &Metadata, time_style: TimeStyle) -> String {
+    format_date(DateTime::from(md.created().unwrap()), time_style)
+}
+
+pub(crate) fn changed_date(md: &Metadata, time_style: TimeStyle) -> String {
+    let secs = md.ctime();
+    let nsecs = md.ctime_nsec();
+    let dt = DateTime::from_timestamp(secs, nsecs as u32).unwrap_or_default();
+    let dt = DateTime::<Local>::from(dt);
+    format_date(dt, time_style)
 }
 
 pub(crate) fn date_default(date_time: DateTime<Local>) -> String {

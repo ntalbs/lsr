@@ -63,7 +63,25 @@ fn format_output_long(paths: &[PathBuf], args: &Args) -> io::Result<String> {
                 .with_ansi_cell(user_name(md.uid()))
                 .with_ansi_cell(if args.group { group_name(md.gid()) } else { "".white() })
                 .with_ansi_cell(file_size(&md, args.bytes))
-                .with_ansi_cell(modified_date(&md, args.time_style))
+                .with_ansi_cell({
+                    let mut dates = vec![];
+                    if args.modified {
+                        dates.push(modified_date(&md, args.time_style));
+                    }
+                    if args.accessed {
+                        dates.push(accessed_date(&md, args.time_style));
+                    }
+                    if args.created {
+                        dates.push(created_date(&md, args.time_style));
+                    }
+                    if args.changed {
+                        dates.push(changed_date(&md, args.time_style));
+                    }
+                    if dates.is_empty() {
+                        dates.push(modified_date(&md, args.time_style));
+                    }
+                    dates.join(" ")
+                })
                 .with_ansi_cell(file_name(path, true))
         );
         if args.extended {

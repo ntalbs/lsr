@@ -111,10 +111,41 @@ pub(crate) struct Args {
     pub(crate) time_style: TimeStyle,
 
     #[clap(
+        short('m'),
+        long("modified"),
+        default_value_t = false,
+        help = "Use the modified timestamp field"
+    )]
+    pub(crate) modified: bool,
+
+    #[clap(
+        short('u'),
+        long("accessed"),
+        default_value_t = false,
+        help = "Use the accessed timestamp field"
+    )]
+    pub(crate) accessed: bool,
+
+    #[clap(
+        short('U'),
+        long("created"),
+        default_value_t = false,
+        help = "Use the created timestamp field"
+    )]
+    pub(crate) created: bool,
+
+    #[clap(
+        long("changed"),
+        default_value_t = false,
+        help = "Use the changed timestamp field"
+    )]
+    pub(crate) changed: bool,
+
+    #[clap(
         short('@'),
         long("extended"),
         default_value_t = false,
-        help = "list each file's extended attributes"
+        help = "List each file's extended attributes"
     )]
     pub(crate) extended: bool,
 }
