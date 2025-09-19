@@ -23,7 +23,11 @@ Options:
   -1, --oneline                  Display one entry per line
       --no-permissions           Suppress the permissions field
       --time-style <TIME_STYLE>  Time format [default: default] [possible values: default, iso, relative]
-  -@, --extended                 list each file's extended attributes
+  -m, --modified                 Use the modified timestamp field
+  -u, --accessed                 Use the accessed timestamp field
+  -U, --created                  Use the created timestamp field
+      --changed                  Use the changed timestamp field
+  -@, --extended                 List each file's extended attributes
   -h, --help                     Print help
   -V, --version                  Print version
-```
+  ```
