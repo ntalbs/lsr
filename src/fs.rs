@@ -2,7 +2,7 @@ use std::{
     fs::{self, FileType, Metadata},
     io,
     os::unix::fs::{FileTypeExt, MetadataExt},
-    path::{Path, PathBuf},
+    path::Path,
 };
 
 use chrono::{DateTime, Local};
@@ -155,9 +155,9 @@ pub(crate) fn date_relative(date_time: DateTime<Local>) -> String {
 }
 
 pub(crate) fn file_name(path: &Path, long: bool) -> String {
-    if path == PathBuf::from(".") {
+    if path == "." {
         return format!("{}/", ".".blue());
-    } else if path == PathBuf::from("..") {
+    } else if path == ".." {
         return format!("{}/", "..".blue());
     }
 
