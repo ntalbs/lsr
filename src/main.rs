@@ -12,7 +12,7 @@ use std::{
 };
 use tabular::{Row, Table};
 use term_grid::{Direction, Filling, Grid, GridOptions};
-use terminal_size::{terminal_size, Width};
+use terminal_size::{Width, terminal_size};
 
 fn format_output_oneline(paths: &[PathBuf]) -> io::Result<String> {
     let mut output = String::new();
