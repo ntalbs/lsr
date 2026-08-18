@@ -185,7 +185,7 @@ pub(crate) fn file_name(path: &Path, long: bool) -> String {
                         "{}{}{}",
                         name.cyan(),
                         " -> ".red(),
-                        &target.to_string_lossy().red()
+                        target.to_string_lossy().red()
                     );
                 }
             }
