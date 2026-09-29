@@ -131,13 +131,13 @@ fn main() -> io::Result<()> {
     let mut paths = args
         .paths
         .iter()
-        .map(PathBuf::from)
-        .filter(|p| {
-            if p.exists() {
-                true
+        .filter_map(|p| {
+            let path = PathBuf::from(p);
+            if path.exists() {
+                Some(path)
             } else {
-                eprintln!("{}: No such file or directory.", file_name(p, false));
-                false
+                eprintln!("{}: No such file or directory.", p.red());
+                None
             }
         })
         .collect::<Vec<PathBuf>>();
