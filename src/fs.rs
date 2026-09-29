@@ -3,6 +3,7 @@ use std::{
     io,
     os::unix::fs::{FileTypeExt, MetadataExt},
     path::Path,
+    time::SystemTime,
 };
 
 use chrono::{DateTime, Local};
@@ -88,16 +89,21 @@ fn format_date(date_time: DateTime<Local>, time_style: TimeStyle) -> String {
     }
 }
 
+fn format_timestamp(ts: io::Result<SystemTime>, time_style: TimeStyle) -> String {
+    ts.map(|ts| format_date(DateTime::from(ts), time_style))
+        .unwrap_or_else(|_| "-".to_string())
+}
+
 pub(crate) fn modified_date(md: &Metadata, time_style: TimeStyle) -> String {
-    format_date(DateTime::from(md.modified().unwrap()), time_style)
+    format_timestamp(md.modified(), time_style)
 }
 
 pub(crate) fn accessed_date(md: &Metadata, time_style: TimeStyle) -> String {
-    format_date(DateTime::from(md.accessed().unwrap()), time_style)
+    format_timestamp(md.accessed(), time_style)
 }
 
 pub(crate) fn created_date(md: &Metadata, time_style: TimeStyle) -> String {
-    format_date(DateTime::from(md.created().unwrap()), time_style)
+    format_timestamp(md.created(), time_style)
 }
 
 pub(crate) fn changed_date(md: &Metadata, time_style: TimeStyle) -> String {
