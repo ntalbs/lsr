@@ -6,9 +6,9 @@ edition = "2024"
 [dependencies]
 chrono = "0.4"
 clap = { version = "4", features = ["derive"] }
-colored = "2"
+colored = "3"
 tabular = { version = "0.2", features = ["ansi-cell"] }
 terminal_size = "0.4"
 uzers = "0.12"
-uutils_term_grid = "0.6"
+uutils_term_grid = "0.8"
 xattr = "1"
