@@ -1,7 +1,17 @@
 [package]
-name = "lsr"
+name = "ntalbs-lsr"
 version = "0.1.0"
+authors = ["ntalbs <ntalbsen@gmail.com>"]
 edition = "2024"
+description = "Very basic ls clone"
+repository = "https://github.com/ntalbs/lsr"
+license = "MIT"
+keywords = ["ls", "cli"]
+categories = ["command-line-utilities"]
+
+[[bin]]
+name = "lsr"
+path = "src/main.rs"
 
 [dependencies]
 chrono = "0.4"
