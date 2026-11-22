@@ -1,13 +1,9 @@
 use std::{
-    fs::{self, FileType, Metadata},
-    io,
-    os::unix::fs::{FileTypeExt, MetadataExt},
-    path::Path,
-    time::SystemTime,
+    fs::{self, FileType, Metadata}, io, os::unix::fs::{FileTypeExt, MetadataExt}, path::Path, time::SystemTime,
 };
 
-use chrono::{DateTime, Local};
 use colored::{ColoredString, Colorize};
+use time::{OffsetDateTime, UtcOffset, macros::format_description};
 use uzers::{get_group_by_gid, get_user_by_uid};
 
 use crate::cli::TimeStyle;
@@ -81,7 +77,7 @@ pub(crate) fn group_name(gid: u32) -> ColoredString {
         .yellow()
 }
 
-fn format_date(date_time: DateTime<Local>, time_style: TimeStyle) -> String {
+fn format_date(date_time: OffsetDateTime, time_style: TimeStyle) -> String {
     match time_style {
         TimeStyle::Default => date_default(date_time),
         TimeStyle::Iso => date_iso(date_time),
@@ -90,7 +86,7 @@ fn format_date(date_time: DateTime<Local>, time_style: TimeStyle) -> String {
 }
 
 fn format_timestamp(ts: io::Result<SystemTime>, time_style: TimeStyle) -> String {
-    ts.map(|ts| format_date(DateTime::from(ts), time_style))
+    ts.map(|ts| format_date(OffsetDateTime::from(ts), time_style))
         .unwrap_or_else(|_| "-".to_string())
 }
 
@@ -108,32 +104,33 @@ pub(crate) fn created_date(md: &Metadata, time_style: TimeStyle) -> String {
 
 pub(crate) fn changed_date(md: &Metadata, time_style: TimeStyle) -> String {
     let secs = md.ctime();
-    let nsecs = md.ctime_nsec();
-    let dt = DateTime::from_timestamp(secs, nsecs as u32).unwrap_or_default();
-    let dt = DateTime::<Local>::from(dt);
+    let utc = OffsetDateTime::from_unix_timestamp(secs).unwrap_or(OffsetDateTime::UNIX_EPOCH);
+    let offset = UtcOffset::local_offset_at(utc).unwrap_or(UtcOffset::UTC);
+    let dt = utc.to_offset(offset);
     format_date(dt, time_style)
 }
 
-pub(crate) fn date_default(date_time: DateTime<Local>) -> String {
-    let now = Local::now();
+pub(crate) fn date_default(date_time: OffsetDateTime) -> String {
+    let now = OffsetDateTime::now_local().unwrap();
     let duration = now - date_time;
 
-    if duration.num_days() / 365 > 1 {
-        format!("{}", date_time.format("%e %b  %Y").to_string().magenta())
+    if duration.whole_days() / 365 > 1 {
+        let fmt = format_description!("[day padding:space] [month repr:short] [year]");
+        let formatted = date_time.format(&fmt).unwrap_or_default();
+        format!("{}", formatted.magenta())
     } else {
-        format!("{}", date_time.format("%e %b %H:%M").to_string().magenta())
+        let fmt = format_description!("[day padding:space] [month repr:short] [hour]:[minute]");
+        let formatted = date_time.format(&fmt).unwrap_or_default();
+        format!("{}", formatted.magenta())
     }
 }
 
-pub(crate) fn date_iso(date_time: DateTime<Local>) -> String {
-    format!(
-        "{} {}",
-        date_time.format("%Y-%m-%d").to_string().magenta(),
-        date_time.format("%H:%M").to_string().bright_magenta()
-    )
+pub(crate) fn date_iso(date_time: OffsetDateTime) -> String {
+    let iso = format_description!("[year]-[month]-[day] [hour]:[minute]:[second]");
+    date_time.format(&iso).unwrap_or_default()
 }
 
-pub(crate) fn date_relative(date_time: DateTime<Local>) -> String {
+pub(crate) fn date_relative(date_time: OffsetDateTime) -> String {
     fn pluralize(n: i64, s: &str) -> String {
         let unit = if n == 1 {
             s.to_string()
@@ -143,20 +140,20 @@ pub(crate) fn date_relative(date_time: DateTime<Local>) -> String {
         format!("{:>2} {}", n.to_string().bright_magenta(), unit.magenta())
     }
 
-    let now = Local::now();
+    let now = OffsetDateTime::now_local().unwrap();
     let duration = now - date_time;
-    if duration.num_minutes() < 1 {
-        pluralize(duration.num_seconds(), "second")
-    } else if duration.num_hours() < 1 {
-        pluralize(duration.num_minutes(), "minute")
-    } else if duration.num_days() < 1 {
-        pluralize(duration.num_hours(), "hour")
-    } else if duration.num_days() < 30 {
-        pluralize(duration.num_days(), "day")
-    } else if duration.num_days() < 365 {
-        pluralize(duration.num_days() / 30, "month")
+    if duration.whole_minutes() < 1 {
+        pluralize(duration.whole_seconds(), "second")
+    } else if duration.whole_hours() < 1 {
+        pluralize(duration.whole_minutes(), "minute")
+    } else if duration.whole_days() < 1 {
+        pluralize(duration.whole_hours(), "hour")
+    } else if duration.whole_days() < 30 {
+        pluralize(duration.whole_days(), "day")
+    } else if duration.whole_days() < 365 {
+        pluralize(duration.whole_days() / 30, "month")
     } else {
-        pluralize(duration.num_days() / 365, "year")
+        pluralize(duration.whole_days() / 365, "year")
     }
 }
 

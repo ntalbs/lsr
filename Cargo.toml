@@ -14,11 +14,11 @@ name = "lsr"
 path = "src/main.rs"
 
 [dependencies]
-chrono = "0.4"
 clap = { version = "4", features = ["derive"] }
 colored = "3"
 tabular = { version = "0.2", features = ["ansi-cell"] }
 terminal_size = "0.4"
+time = { version = "0.3.55", features = ["formatting", "local-offset", "macros"] }
 uzers = "0.12"
 uutils_term_grid = "0.8"
 xattr = "1"
