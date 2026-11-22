@@ -1,6 +1,6 @@
 [package]
 name = "ntalbs-lsr"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["ntalbs <ntalbsen@gmail.com>"]
 edition = "2024"
 description = "Very basic ls clone"
