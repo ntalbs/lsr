@@ -78,11 +78,12 @@ pub(crate) fn group_name(gid: u32) -> ColoredString {
 }
 
 fn format_date(date_time: OffsetDateTime, time_style: TimeStyle) -> String {
-    match time_style {
+    let formatted = match time_style {
         TimeStyle::Default => date_default(date_time),
         TimeStyle::Iso => date_iso(date_time),
         TimeStyle::Relative => date_relative(date_time),
-    }
+    };
+    format!("{}", formatted.magenta())
 }
 
 fn format_timestamp(ts: io::Result<SystemTime>, time_style: TimeStyle) -> String {
@@ -116,12 +117,10 @@ pub(crate) fn date_default(date_time: OffsetDateTime) -> String {
 
     if duration.whole_days() / 365 > 1 {
         let fmt = format_description!("[day padding:space] [month repr:short] [year]");
-        let formatted = date_time.format(&fmt).unwrap_or_default();
-        format!("{}", formatted.magenta())
+        date_time.format(&fmt).unwrap_or_default()
     } else {
         let fmt = format_description!("[day padding:space] [month repr:short] [hour]:[minute]");
-        let formatted = date_time.format(&fmt).unwrap_or_default();
-        format!("{}", formatted.magenta())
+        date_time.format(&fmt).unwrap_or_default()
     }
 }
 
@@ -137,7 +136,7 @@ pub(crate) fn date_relative(date_time: OffsetDateTime) -> String {
         } else {
             format!("{s}s")
         };
-        format!("{:>2} {}", n.to_string().bright_magenta(), unit.magenta())
+        format!("{:>2} {}", n.to_string(), unit)
     }
 
     let now = OffsetDateTime::now_local().unwrap();
